@@ -75,3 +75,13 @@ genesisBlock = {u'hash':genesisHash,u'contents':genesisBlockContents}
 genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
 
 chain = [genesisBlock]  # Initialize the blockchain with the genesis block
+
+def makeBlock(txns, chain):
+    parentBlock = chain[-1]  # Get the last block in the chain
+    parentHash = parentBlock[u'hash']  # Get the hash of the last block
+    blockNumber = parentBlock[u'contents'][u'blockNumber'] + 1  # Increment the block number
+    txnCount = len(txns)  # Get the number of transactions in the new block
+    blockContents = {u'blockNumber':blockNumber, u'parentHash':parentHash, u'txnCount':len(txns), u'txns':txns}  # Create the block contents
+    blockHash = hashMe(blockContents)  # Hash the block contents to get the block hash
+    block = {u'hash':blockHash, u'contents':blockContents}  # Create the block with its hash and contents
+    return block

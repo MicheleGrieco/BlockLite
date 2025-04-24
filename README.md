@@ -53,3 +53,6 @@ We're ready to start making our blockchain! Right now, there's nothing on the bl
 Because the genesis block isn’t linked to any prior block, it gets treated a bit differently, and we can arbitrarily set the system state. In our case, we’ll **create accounts** for our two users (Alice and Bob) and give them 50 coins each.
 
 This becomes the first element from which everything else will be linked.
+For each block, we want to collect a set of transactions, create a header, hash it, and add it to the chain.
+
+Let's use this to process our transaction buffer into a set of blocks.
