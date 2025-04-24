@@ -37,4 +37,10 @@ Next step: making our very own blocks! We’ll take the first *k* transactions f
 
 For *bitcoin*, the validation function checks that the input values are valid unspent transaction outputs (UTXOs), that the outputs of the transaction are no greater than the input, and that the keys used for the signatures are valid. In *Ethereum*, the validation function checks that the smart contracts were faithfully executed and respect gas limits.
 
-[TODO: Expand ruleset]
+No worries though - we don't have to build a system that complicated. We'll define our own, very simple set of rules which make sense for a basic token system.
+- The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
+- A user's account must have sufficient funds to cover any withdrawals.
+
+If either of these conditions are violated, we'll reject the transaction.
+
+[CONTINUE]
