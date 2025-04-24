@@ -1,0 +1,19 @@
+# Virtual Environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+.vscode/
+
+# Pytest cache
+__pycache__/
+*.cover
+*.coverage
+.coverage.*
+*.hypothesis/
