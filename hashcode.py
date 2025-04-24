@@ -2,13 +2,19 @@ import hashlib
 import json
 import sys
 
-"""
-hashMe(msg="")
+
+def hashMe(msg=""):
+    """
     Hashes a message using SHA-256 algorithm.
     The message can be a string or a dictionary.
     If it's a dictionary, it will be converted to a JSON string with sorted keys to ensure consistent hashing.
-"""
-def hashMe(msg=""):
+
+    Args:
+        msg (str, optional): Defaults to "".
+
+    Returns:
+        str: The SHA-256 hash of the message.
+    """
     if type(msg) != str:
         # Sorting keys to guarantee consistent hashing for dicts
         msg = json.dumps(msg, sort_keys=True)
