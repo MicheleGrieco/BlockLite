@@ -1,15 +1,21 @@
 """
-    updateState(txn, state)
-    The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
-    A user’s account must have sufficient funds to cover any withdrawals
+    RULES for a simple banking system:
+    - The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
+    - A user’s account must have sufficient funds to cover any withdrawals
 """
 
 def updateState(txn, state):
-    # Inputs: txn, state: dictionaries keyed with account names, holding numeric values for transfer amount (txn) or account balance (state)
-    # Returns: Updated state, with additional users added to state if necessary
-    # Note: This does not not validate the transaction- just updates the state!
+    """
+    Updates the state of the accounts based on the transaction.
     
-    # If the transaction is valid, then update the state
+    Args:
+        txn (dict): dictionary keyed with account names, holding numeric values for transfer amount
+        state (dict): dictionary keyed with account names, holding numeric values for account balance
+
+    Returns:
+        dict: Updated state, with additional users added to state if necessary
+    """
+    
     # As dictionaries are mutable, let's avoid any confusion by creating a working copy of the data.
     state = state.copy()
     for key in txn:
@@ -19,7 +25,19 @@ def updateState(txn, state):
             state[key] = txn[key]
     return state
 
+
 def isValidTxn(txn, state):
+    
+    """
+    Checks if a transaction is valid according to the rules defined.
+    
+    Args:
+        txn (dict): dictionary keyed with account names, holding numeric values for transfer amount
+        state (dict): dictionary keyed with account names, holding numeric values for account balance
+
+    Returns:
+        bool: True if the transaction is valid, False otherwise
+    """
     # Assume that the transaction is a dictionary keyed by account names
 
     # Check that the sum of the deposits and withdrawals is 0
@@ -36,6 +54,8 @@ def isValidTxn(txn, state):
             return False
     
     return True
+
+
 
 state = {u'Alice':5, u'Bob':5}
 
