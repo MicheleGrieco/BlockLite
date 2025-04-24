@@ -1,4 +1,5 @@
 """
+    updateState(txn, state)
     The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
     A user’s account must have sufficient funds to cover any withdrawals
 """
@@ -6,7 +7,7 @@
 def updateState(txn, state):
     # Inputs: txn, state: dictionaries keyed with account names, holding numeric values for transfer amount (txn) or account balance (state)
     # Returns: Updated state, with additional users added to state if necessary
-    # NOTE: This does not not validate the transaction- just updates the state!
+    # Note: This does not not validate the transaction- just updates the state!
     
     # If the transaction is valid, then update the state
     # As dictionaries are mutable, let's avoid any confusion by creating a working copy of the data.
