@@ -17,7 +17,7 @@ Ever wondered how Bitcoin, Ethereum, and other cryptocurrencies actually work un
 
 We'll demystify blockchains by constructing a simple yet functional model, focusing on how and why it works—one block at a time.
 
-## The Basics
+## Build your Own Blockchain: The Basics
 
 This tutorial will walk you through the basics of **how to build a blockchain from scratch**. Focusing on the details of a concrete example will provide a deeper understanding of the strengths and limitations of blockchains.
 
@@ -43,10 +43,13 @@ No worries though - we don't have to build a system that complicated. We'll defi
 
 If either of these conditions are violated, we'll reject the transaction.
 
-There are a set of sample transactions, some of which are fraudulent- but we can now check their validity!
+There are a set of **sample transactions**, some of which are fraudulent - but we can now check their validity!
 
 Each block contains a batch of transactions, a reference to the hash of the previous block (if block number is greater than 1), and a hash of its contents and the header.
 
 ## Building the Blockchain: from Transactions to Blocks
 
 We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by definyng the '*genesis block*' (the first block in the system).
+Because the genesis block isn’t linked to any prior block, it gets treated a bit differently, and we can arbitrarily set the system state. In our case, we’ll **create accounts** for our two users (Alice and Bob) and give them 50 coins each.
+
+This becomes the first element from which everything else will be linked.

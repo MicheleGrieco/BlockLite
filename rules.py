@@ -3,6 +3,8 @@
     - The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
     - A user’s account must have sufficient funds to cover any withdrawals
 """
+import json
+import hashcode as hashMe
 
 def updateState(txn, state):
     """
@@ -64,3 +66,12 @@ print(isValidTxn({u'Alice': -4, u'Bob': 3}, state))  # But we can't create or de
 print(isValidTxn({u'Alice': -6, u'Bob': 6}, state))  # We also can't overdraft our account.
 print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new users is valid
 print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # But the same rules still apply!
+
+state = {u'Alice':50, u'Bob':50}  # Define the initial state
+genesisBlockTxns = [state]
+genesisBlockContents = {u'blockNumber':0,u'parentHash':None,u'txnCount':1,u'txns':genesisBlockTxns}
+genesisHash = hashMe(genesisBlockContents)
+genesisBlock = {u'hash':genesisHash,u'contents':genesisBlockContents}
+genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
+
+chain = [genesisBlock]  # Initialize the blockchain with the genesis block
