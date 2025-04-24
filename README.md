@@ -43,4 +43,10 @@ No worries though - we don't have to build a system that complicated. We'll defi
 
 If either of these conditions are violated, we'll reject the transaction.
 
-[CONTINUE]
+There are a set of sample transactions, some of which are fraudulent- but we can now check their validity!
+
+Each block contains a batch of transactions, a reference to the hash of the previous block (if block number is greater than 1), and a hash of its contents and the header.
+
+## Building the Blockchain: from Transactions to Blocks
+
+We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by definyng the '*genesis block*' (the first block in the system).
