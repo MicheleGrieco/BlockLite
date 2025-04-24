@@ -56,3 +56,10 @@ This becomes the first element from which everything else will be linked.
 For each block, we want to collect a set of transactions, create a header, hash it, and add it to the chain.
 
 Let's use this to process our transaction buffer into a set of blocks.
+
+As expected, the genesis block includes an invalid transaction which initiates account balances (creating tokens out of thin air).
+The hash of the parent block is referenced in the child block, which contains a set of new transactions which affect system state. We can now see the state of the system, updated to include the transactions.
+
+## Checking Chain Validity
+
+[TODO]

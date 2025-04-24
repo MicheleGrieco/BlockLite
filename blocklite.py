@@ -138,6 +138,17 @@ genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
 chain = [genesisBlock]  # Initialize the blockchain with the genesis block
 
 def makeBlock(txns, chain):
+    """
+    Creates a new block with the given transactions and appends it to the blockchain.
+    The block is created by hashing the transactions and the previous block's hash.
+
+    Args:
+        txns (_type_): _description_
+        chain (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     parentBlock = chain[-1]  # Get the last block in the chain
     parentHash = parentBlock[u'hash']  # Get the hash of the last block
     blockNumber = parentBlock[u'contents'][u'blockNumber'] + 1  # Increment the block number
@@ -146,3 +157,50 @@ def makeBlock(txns, chain):
     blockHash = hashMe(blockContents)  # Hash the block contents to get the block hash
     block = {u'hash':blockHash, u'contents':blockContents}  # Create the block with its hash and contents
     return block
+
+
+# Arbitrary number of transactions per block
+# This is chosen by the block miner, and can vary between blocks!
+blockSizeLimit = 5
+
+while len(txnBuffer) > 0:
+    bufferStartSize = len(txnBuffer)
+    
+    # Gather a set of valid transactions for inclusion
+    txnList = []
+    while (len(txnBuffer) > 0) & (len(txnList) < blockSizeLimit):
+        newTxn = txnBuffer.pop()
+        validTxn = isValidTxn(newTxn,state) # This will return False if txn is invalid
+        
+        if validTxn:           # If we got a valid state, not 'False'
+            txnList.append(newTxn)
+            state = updateState(newTxn,state)
+        else:
+            print("ignored transaction")
+            sys.stdout.flush()
+            continue  # This was an invalid transaction; ignore it and move on
+        
+    ## Make a block
+    myBlock = makeBlock(txnList,chain)
+    chain.append(myBlock)  
+    
+chain[0]
+chain[1]
+state
+
+def checkBlockHash(block):
+    """
+    Checks if the hash of the block matches the hash in the block.
+
+    Args:
+        block (dict): The block to check.
+
+    Returns:
+        bool: True if the hash matches, False otherwise.
+    """
+
+    # Raise an exception if the hash does not match the block contents
+    expectedHash = hashMe(block['contents'])
+    if block['hash'] != expectedHash:
+        raise Exception('Hash does not match contents of block %s'%block['contents']['blockNumber'])
+    return
