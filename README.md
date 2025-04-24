@@ -5,7 +5,7 @@ A minimal yet powerful blockchain algorithm built from scratch in Python.
 
 # Getting Started
 Clone the repository and follow the inline comments in the Python scripts to explore each part of the blockchain.
-```python
+```bash
 git clone https://github.com/MicheleGrieco/blocklite.git
 cd blocklite
 python3 [main]
