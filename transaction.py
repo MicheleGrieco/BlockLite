@@ -2,8 +2,16 @@ import random
 
 random.seed(0)
 
+"""
+    makeTransaction(maxValue=3) -> dict
+    Creates a random transaction between Alice and Bob, where the amount is between -maxValue and maxValue.
+    The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
+    A user’s account must have sufficient funds to cover any withdrawals.
+    The transaction is represented as a dictionary with account names as keys and amounts as values.
+    The function returns a dictionary with the transaction details.
+    The transaction is guaranteed to be valid according to the rules defined in the isValidTxn function.
+"""
 def makeTransaction(maxValue=3):
-    # Creates a valid transaction in the range of (1, maxValue)
     sign = int(random.getrandbits(1)) * 2 - 1
     # Randomly choose a value between -1 and 1
     amount = random.randint(1, maxValue)
