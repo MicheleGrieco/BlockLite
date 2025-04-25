@@ -118,7 +118,7 @@ def isValidTxn(txn, state):
     
     return True
 
-
+###############################################################################
 
 state = {u'Alice':5, u'Bob':5}
 
@@ -136,6 +136,8 @@ genesisBlock = {u'hash':genesisHash,u'contents':genesisBlockContents}
 genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
 
 chain = [genesisBlock]  # Initialize the blockchain with the genesis block
+
+###############################################################################
 
 def makeBlock(txns, chain):
     """
@@ -158,6 +160,7 @@ def makeBlock(txns, chain):
     block = {u'hash':blockHash, u'contents':blockContents}  # Create the block with its hash and contents
     return block
 
+###############################################################################
 
 # Arbitrary number of transactions per block
 # This is chosen by the block miner, and can vary between blocks!
@@ -183,10 +186,12 @@ while len(txnBuffer) > 0:
     ## Make a block
     myBlock = makeBlock(txnList,chain)
     chain.append(myBlock)  
-    
+
 chain[0]
 chain[1]
 state
+
+###############################################################################
 
 def checkBlockHash(block):
     """
@@ -204,3 +209,87 @@ def checkBlockHash(block):
     if block['hash'] != expectedHash:
         raise Exception('Hash does not match contents of block %s'%block['contents']['blockNumber'])
     return
+
+
+def checkBlockValidity(block, parent, state):
+    """
+    Checks if a block is valid according to the rules defined.
+    The block is valid if:
+    - each of the transactions are valid updates to the system state
+    - block hash is valid for the block contents
+    - block number increments the parent block number by 1
+    - accurately references the parent block's hash
+    
+    Args:
+        block (dict): The block to check.
+        parent (dict): The parent block.
+        state (dict): The current state of the accounts.
+    Returns:
+        dict: The updated state if the block is valid, raises an exception otherwise.
+    """
+    
+    parentNumber = parent[u'contents'][u'blockNumber']
+    parentHash = parent[u'hash']
+    blockNumber = block[u'contents'][u'blockNumber']
+    
+    # Check transaction validity; throw an error if an invalid transaction is found
+    for txn in block[u'contents'][u'txns']:
+        if isValidTxn(txn, state):
+            state = updateState(txn, state)
+        else:
+            raise Exception('Invalid transaction in block %s: %s'%(blockNumber, txn))
+    
+    # Check hash integrity; raise error if inaccurate
+    checkBlockHash(block)
+    
+    if blockNumber != parentNumber + 1:
+        raise Exception('Hash does not match contents of block %s'%blockNumber)
+    if block[u'contents'][u'parentHash'] != parentHash:
+        raise Exception('Parent hash not accurate at block %s'%blockNumber)
+    
+    return state
+
+
+def checkChain(chain):
+    """
+    Checks if a chain of blocks is valid according to the rules defined.
+    Works through the chain from the genesis block (which gets special treatment),
+    checking that all transactions are internally valid,
+    that the transactions do not cause an overdraft,
+    and that the blocks are linked by their hashes.
+    
+    Args:
+        chain (list): A list of blocks to check.
+    
+    Returns:
+        state (dict): The final state of the accounts if the chain is valid, False otherwise.
+    """
+    
+    if type(chain) == str:
+        try:
+            chain = json.loads(chain)
+            assert type(chain) == list
+        except:
+            return False
+    elif type(chain) != list:
+        return False
+    
+    state = {}
+    
+    for txn in chain[0][u'contents'][u'txns']:
+        state = updateState(txn, state)
+    checkBlockHash(chain[0])
+    parent = chain[0]
+    
+    for block in chain[1:]:
+        state = checkBlockValidity(block, parent, state)
+        parent = block
+        
+    return state
+
+###############################################################################
+
+checkChain(chain)
+
+chainAsText = json.dumps(chain, sort_keys=True)
+checkChain(chainAsText)
