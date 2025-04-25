@@ -8,7 +8,7 @@ Clone the repository and follow the inline comments in the Python scripts to exp
 ```bash
 git clone https://github.com/MicheleGrieco/blocklite.git
 cd blocklite
-python3 [main]
+python3 blocklite.py
 ```
 
 # Introduction
