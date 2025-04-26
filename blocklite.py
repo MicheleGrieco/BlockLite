@@ -1,3 +1,10 @@
+"""
+    RULES for a simple banking system:
+    - The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
+    - A user’s account must have sufficient funds to cover any withdrawals
+"""
+
+
 import hashlib
 import json
 import sys
@@ -60,12 +67,6 @@ def makeTransaction(maxValue=3):
 
 # This is a list of transactions that will be used to test the algorithm.
 txnBuffer = [makeTransaction() for i in range(30)]
-
-"""
-    RULES for a simple banking system:
-    - The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
-    - A user’s account must have sufficient funds to cover any withdrawals
-"""
 
 
 def updateState(txn, state):
