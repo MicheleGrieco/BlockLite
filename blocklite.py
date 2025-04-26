@@ -67,6 +67,7 @@ txnBuffer = [makeTransaction() for i in range(30)]
     - A user’s account must have sufficient funds to cover any withdrawals
 """
 
+
 def updateState(txn, state):
     """
     Updates the state of the accounts based on the transaction.
@@ -139,6 +140,7 @@ chain = [genesisBlock]  # Initialize the blockchain with the genesis block
 
 ###############################################################################
 
+
 def makeBlock(txns, chain):
     """
     Creates a new block with the given transactions and appends it to the blockchain.
@@ -192,6 +194,7 @@ chain[1]
 state
 
 ###############################################################################
+
 
 def checkBlockHash(block):
     """
