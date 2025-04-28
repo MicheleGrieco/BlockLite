@@ -15,7 +15,7 @@ random.seed(0)
 
 def hashMe(msg=""):
     """
-    Hashes a message using SHA-256 algorithm.
+    Helper function to hash a message using SHA-256 algorithm.
     The message can be a string or a dictionary.
     If it's a dictionary, it will be converted to a JSON string with sorted keys to ensure consistent hashing.
 
@@ -42,7 +42,7 @@ def hashMe(msg=""):
 def makeTransaction(maxValue=3):
     """
     Creates a random transaction between Alice and Bob, where the amount is between -maxValue and maxValue.
-    The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
+    The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
     A user’s account must have sufficient funds to cover any withdrawals.
     The transaction is represented as a dictionary with account names as keys and amounts as values.
     The function returns a dictionary with the transaction details.
