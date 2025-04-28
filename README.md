@@ -62,4 +62,17 @@ The hash of the parent block is referenced in the child block, which contains a 
 
 ## Checking Chain Validity
 
+Now that we know how to create new blocks and link them together into a chain, let’s define functions to check that new blocks are valid- and that the whole chain is valid.
+
+On a blockchain network, this becomes important in two ways:
+
+- When we initially set up our node, we will download the full blockchain history. After downloading the chain, we would need to run through the blockchain to compute the state of the system. To protect against somebody inserting invalid transactions in the initial chain, we need to check the validity of the entire chain in this initial download.
+- Once our node is synced with the network (has an up-to-date copy of the blockchain and a representation of system state) it will need to check the validity of new blocks that are broadcast to the network.
+
+We will need three functions to facilitate in this:
+
+- **checkBlockHash**: A simple helper function that makes sure that the block contents match the hash
+- **checkBlockValidity**: Checks the validity of a block, given its parent and the current system state. We want this to return the updated state if the block is valid, and raise an error otherwise.
+- **checkChain**: Check the validity of the entire chain, and compute the system state beginning at the genesis block. This will return the system state if the chain is valid, and raise an error otherwise.
+
 [TODO]

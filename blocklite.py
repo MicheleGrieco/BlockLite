@@ -297,3 +297,67 @@ checkChain(chain)
 
 chainAsText = json.dumps(chain, sort_keys=True)
 checkChain(chainAsText)
+
+###############################################################################
+
+
+def checkBlockHash(block):
+    """
+    Checks if the hash of the block matches the hash in the block.
+
+    Args:
+        block (dict): The block to check.
+
+    Returns:
+        bool: True if the hash matches, False otherwise.
+    """
+
+    # Raise an exception if the hash does not match the block contents
+    expectedHash = hashMe(block['contents'])
+    if block['hash'] != expectedHash:
+        raise Exception('Hash does not match contents of block %s'%block['contents']['blockNumber'])
+    return
+
+
+def checkBlockValidity(block, parent, state):
+    """
+    Checks if a block is valid according to the rules defined.
+    The block is valid if:
+    - each of the transactions are valid updates to the system state
+    - block hash is valid for the block contents
+    - block number increments the parent block number by 1
+    - accurately references the parent block's hash
+    Args:
+        block (dict): The block to check.
+        parent (dict): The parent block.
+        state (dict): The current state of the accounts.
+    Returns:
+        dict: The updated state if the block is valid, raises an exception otherwise.
+    Raises:
+        Exception: If the block is invalid, an exception is raised with a message indicating the reason.
+    """
+    
+    parentNumber = parent[u'contents'][u'blockNumber']
+    parentHash = parent[u'hash']
+    blockNumber = block[u'contents'][u'blockNumber']
+    
+    # Check transaction validity; throw an error if an invalid transaction is found
+    for txn in block[u'contents'][u'txns']:
+        if isValidTxn(txn, state):
+            state = updateState(txn, state)
+        else:
+            raise Exception('Invalid transaction in block %s: %s'%(blockNumber, txn))
+        
+    # Check hash integrity; raise error if inaccurate
+    checkBlockHash(block)
+    
+    if blockNumber != parentNumber + 1:
+        raise Exception('Hash does not match contents of block %s'%blockNumber)
+    
+    if block[u'contents'][u'parentHash'] != parentHash:
+        raise Exception('Parent hash not accurate at block %s'%blockNumber)
+    
+    return state
+
+def checkChain(chain):
+    return
