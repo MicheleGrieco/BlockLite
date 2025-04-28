@@ -75,4 +75,14 @@ We will need three functions to facilitate in this:
 - **checkBlockValidity**: Checks the validity of a block, given its parent and the current system state. We want this to return the updated state if the block is valid, and raise an error otherwise.
 - **checkChain**: Check the validity of the entire chain, and compute the system state beginning at the genesis block. This will return the system state if the chain is valid, and raise an error otherwise.
 
+We can now check the validity of the state.
+
+And even if we are loading the chain from a text file, e.g. from backup or loading it for the first time, we can check the integrity of the chain and create the current state.
+
+## Putting it together: The final Blockchain Architecture
+
+In an actual blockchain network, new nodes would download a copy of the blockchain and verify it (as we just did above), then annouce their presence on the peer-to-peer network and start listening for transactions. Bundling transactions into a block, they then pass their proposed block on to other nodes.
+
+We've seen how to verify a copy of the blockchain, and how to bundle transactions into a block. If we recieve a block from somewhere else, verifying it and adding it to our blockchain is easy.
+
 [TODO]

@@ -359,5 +359,48 @@ def checkBlockValidity(block, parent, state):
     
     return state
 
+
 def checkChain(chain):
-    return
+    """
+    Checks if a chain of blocks is valid according to the rules defined.
+    Works through the chain from the genesis block (which gets special treatment),
+    checking that all transactions are internally valid,
+    that the transactions do not cause an overdraft,
+    and that the blocks are linked by their hashes.
+    Args:
+        chain (list): A list of blocks to check.
+    Returns:
+        state (dict): The final state of the accounts if the chain is valid, False otherwise.
+    Raises:
+        Exception: If the chain is invalid, an exception is raised with a message indicating the reason.
+    """
+    
+    if type(chain) == str:
+        try:
+            chain = json.loads(chain)
+            assert type(chain) == list
+        except: # This will catch any errors in the JSON parsing
+            return False
+    elif type(chain) != list:
+        return False
+    
+    state = {}
+    
+    for txn in chain[0][u'contents'][u'txns']:
+        state = updateState(txn, state)
+    checkBlockHash(chain[0])
+    parent = chain[0]
+    
+    for block in chain[1:]:
+        state = checkBlockValidity(block, parent, state)
+        parent = block
+    
+    return state
+
+###############################################################################
+
+
+checkChain(chain)
+
+chainAsText = json.dumps(chain, sort_keys=True)
+checkChain(chainAsText)
