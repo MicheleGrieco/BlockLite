@@ -54,14 +54,13 @@ def makeTransaction(maxValue=3):
     Returns:
         str: A string representation of the transaction.
     """
-    sign = int(random.getrandbits(1)) * 2 - 1
     # Randomly choose a value between -1 and 1
+    sign = int(random.getrandbits(1)) * 2 - 1
     amount = random.randint(1, maxValue)
+    # By construction, this will always return transactions that respect the conservation of tokens.
     alicePays = sign * amount
     bobPays = -1 * alicePays
     
-    # By construction, this will always return transactions that respect the conservation of tokens.
-    # However, note that we have not done anything to check whether these overdraft an account
     return {u'Alice':alicePays,u'Bob':bobPays}
 
 
@@ -103,7 +102,6 @@ def isValidTxn(txn, state):
     Returns:
         bool: True if the transaction is valid, False otherwise
     """
-    # Assume that the transaction is a dictionary keyed by account names
 
     # Check that the sum of the deposits and withdrawals is 0
     if sum(txn.values()) != 0:
@@ -122,19 +120,21 @@ def isValidTxn(txn, state):
 
 ###############################################################################
 
+# Initial state
 state = {u'Alice':5, u'Bob':5}
 
-print(isValidTxn({u'Alice': -3, u'Bob': 3}, state))  # Basic transaction- this works great!
-print(isValidTxn({u'Alice': -4, u'Bob': 3}, state))  # But we can't create or destroy tokens!
-print(isValidTxn({u'Alice': -6, u'Bob': 6}, state))  # We also can't overdraft our account.
-print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new users is valid
-print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # But the same rules still apply!
+print(isValidTxn({u'Alice': -3, u'Bob': 3}, state))  # Valid
+print(isValidTxn({u'Alice': -4, u'Bob': 3}, state))  # Not valid
+print(isValidTxn({u'Alice': -6, u'Bob': 6}, state))  # Overdraft
+print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new user
+print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # Not valid
 
-state = {u'Alice':50, u'Bob':50}  # Define the initial state
+# Initial state
+state = {u'Alice':50, u'Bob':50}
 genesisBlockTxns = [state]
-genesisBlockContents = {u'blockNumber':0,u'parentHash':None,u'txnCount':1,u'txns':genesisBlockTxns}
+genesisBlockContents = {u'blockNumber':0, u'parentHash':None, u'txnCount':1, u'txns':genesisBlockTxns}
 genesisHash = hashMe(genesisBlockContents)
-genesisBlock = {u'hash':genesisHash,u'contents':genesisBlockContents}
+genesisBlock = {u'hash':genesisHash, u'contents':genesisBlockContents}
 genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
 
 chain = [genesisBlock]  # Initialize the blockchain with the genesis block
