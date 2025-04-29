@@ -85,4 +85,34 @@ In an actual blockchain network, new nodes would download a copy of the blockcha
 
 We've seen how to verify a copy of the blockchain, and how to bundle transactions into a block. If we recieve a block from somewhere else, verifying it and adding it to our blockchain is easy.
 
-[TODO]
+Let's say that the following code runs on Node A, which mines the block:
+
+```python
+import copy
+nodeBchain = copy.copy(chain)
+nodeBtxns = [makeTransaction() for i in range(5)]
+newBlock = makeBlock(nodeBtxns, nodeBchain)
+```
+
+Now assume that the newBlock is trasmitted to our node, and we want to check it and update our state if it is a valid block:
+
+```python
+print("Blockchain on Node A is currently %s blocks long"%len(chain))
+try:
+    print("New Block Received; checking validity...")
+    # Update the state - this will throw an error if the block is invalid!
+    state = checkBlockValidity(newBlock, chain[-1], state)
+    chain.append(newBlock)
+except:
+    print("Invalid block; ignoring and waiting for the next block...")
+
+print("Blockchain on Node A is now %s blocks long"%len(chain))
+```
+
+## Conclusions and Extensions
+
+We've created all the basic architecture for a blockchain, from a set of state transition rules to a method for creating blocks, to mechanisms for checking the validity of transactions, blocks, and the full chain. We can derive the system state from a downloaded copy of the blockchain, validate new blocks that we receive from the network, and create our own blocks.
+
+The system state that we've created is effectively a distriuted ledger or database - the core of many blockchains. We could extend this to include special transaction types or full smart contracts.
+
+We haven't explored the network architecture, the proof-of-work or proof-of-state validation step, and the consensus mechanism which provides blockchains with security against attacks. We also haven't discussed public key cryptography, privacy, and verification steps. More on that in the future!
