@@ -31,7 +31,11 @@ We’ll be using a **hash function** to create a ‘*fingerprint*’ for each of
 
 Next, we want to create a function to generate exchanges between Alice and Bob. We’ll indicate *withdrawals* with negative numbers, and *deposits* with positive numbers. We’ll construct our transactions to always be between the two users of our system, and make sure that the deposit is the same magnitude as the withdrawal - i.e. that we’re neither creating nor destroying money.
 
-Now let’s create a large set of transactions, then chunk them into blocks.
+Now let’s create a large set of transactions, then chunk them into blocks:
+
+```python
+txnBuffer = [makeTransaction() for i in range(30)]
+```
 
 Next step: making our very own blocks! We’ll take the first *k* transactions from the transaction buffer, and turn them into a block. Before we do that, we need to define a method for checking the **validity of the transactions** we’ve pulled into the block.
 
@@ -43,7 +47,18 @@ No worries though - we don't have to build a system that complicated. We'll defi
 
 If either of these conditions are violated, we'll reject the transaction.
 
-There are a set of **sample transactions**, some of which are fraudulent - but we can now check their validity!
+Here are a set of **sample transactions**, some of which are fraudulent - but we can now check their validity!
+
+```python
+# Initial state
+state = {u'Alice':5, u'Bob':5}
+
+print(isValidTxn({u'Alice': -3, u'Bob': 3}, state))  # Valid
+print(isValidTxn({u'Alice': -4, u'Bob': 3}, state))  # Not valid
+print(isValidTxn({u'Alice': -6, u'Bob': 6}, state))  # Overdraft
+print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new user
+print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # Not valid
+```
 
 Each block contains a batch of transactions, a reference to the hash of the previous block (if block number is greater than 1), and a hash of its contents and the header.
 
@@ -51,6 +66,21 @@ Each block contains a batch of transactions, a reference to the hash of the prev
 
 We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by definyng the '*genesis block*' (the first block in the system).
 Because the genesis block isn’t linked to any prior block, it gets treated a bit differently, and we can arbitrarily set the system state. In our case, we’ll **create accounts** for our two users (Alice and Bob) and give them 50 coins each.
+
+```python
+# Genesis block
+# The genesis block is the first block in the blockchain, and it has no parent.
+# Initial state of the system is set to 50 for both Alice and Bob.
+state = {u'Alice':50, u'Bob':50}
+genesisBlockTxns = [state]
+genesisBlockContents = {u'blockNumber':0, u'parentHash':None, u'txnCount':1, u'txns':genesisBlockTxns}
+genesisHash = hashMe(genesisBlockContents)
+genesisBlock = {u'hash':genesisHash, u'contents':genesisBlockContents}
+genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
+
+# Initialize the blockchain with the genesis block
+chain = [genesisBlock]
+```
 
 This becomes the first element from which everything else will be linked.
 For each block, we want to collect a set of transactions, create a header, hash it, and add it to the chain.

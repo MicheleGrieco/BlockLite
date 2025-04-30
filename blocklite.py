@@ -64,10 +64,6 @@ def makeTransaction(maxValue=3):
     return {u'Alice':alicePays,u'Bob':bobPays}
 
 
-# This is a list of transactions that will be used to test the algorithm.
-txnBuffer = [makeTransaction() for i in range(30)]
-
-
 def updateState(txn, state):
     """
     Updates the state of the accounts based on the transaction.
@@ -120,27 +116,7 @@ def isValidTxn(txn, state):
 
 ###############################################################################
 
-# Initial state
-state = {u'Alice':5, u'Bob':5}
 
-print(isValidTxn({u'Alice': -3, u'Bob': 3}, state))  # Valid
-print(isValidTxn({u'Alice': -4, u'Bob': 3}, state))  # Not valid
-print(isValidTxn({u'Alice': -6, u'Bob': 6}, state))  # Overdraft
-print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new user
-print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # Not valid
-
-# Genesis block
-# The genesis block is the first block in the blockchain, and it has no parent.
-# Initial state of the system is set to 50 for both Alice and Bob.
-state = {u'Alice':50, u'Bob':50}
-genesisBlockTxns = [state]
-genesisBlockContents = {u'blockNumber':0, u'parentHash':None, u'txnCount':1, u'txns':genesisBlockTxns}
-genesisHash = hashMe(genesisBlockContents)
-genesisBlock = {u'hash':genesisHash, u'contents':genesisBlockContents}
-genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
-
-# Initialize the blockchain with the genesis block
-chain = [genesisBlock]
 
 ###############################################################################
 
