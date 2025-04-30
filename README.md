@@ -107,7 +107,12 @@ We will need three functions to facilitate in this:
 
 We can now check the validity of the state.
 
-And even if we are loading the chain from a text file, e.g. from backup or loading it for the first time, we can check the integrity of the chain and create the current state.
+And even if we are loading the chain from a text file, e.g. from backup or loading it for the first time, we can check the integrity of the chain and create the current state:
+
+```python
+chainAsText = json.dumps(chain, sort_keys=True)
+checkChain(chainAsText)
+```
 
 ## Putting it together: The final Blockchain Architecture
 
