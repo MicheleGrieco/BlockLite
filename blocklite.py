@@ -117,10 +117,6 @@ def isValidTxn(txn, state):
 ###############################################################################
 
 
-
-###############################################################################
-
-
 def makeBlock(txns, chain):
     """
     Creates a new block with the given transactions and appends it to the blockchain.
@@ -142,36 +138,6 @@ def makeBlock(txns, chain):
     block = {u'hash':blockHash, u'contents':blockContents}  # Create the block with its hash and contents
     return block
 
-###############################################################################
-
-# Arbitrary number of transactions per block
-# This is chosen by the block miner, and can vary between blocks!
-blockSizeLimit = 5
-
-while len(txnBuffer) > 0:
-    bufferStartSize = len(txnBuffer)
-    
-    # Gather a set of valid transactions for inclusion
-    txnList = []
-    while (len(txnBuffer) > 0) & (len(txnList) < blockSizeLimit):
-        newTxn = txnBuffer.pop()
-        validTxn = isValidTxn(newTxn,state) # This will return False if txn is invalid
-        
-        if validTxn:           # If we got a valid state, not 'False'
-            txnList.append(newTxn)
-            state = updateState(newTxn,state)
-        else:
-            print("ignored transaction")
-            sys.stdout.flush()
-            continue  # This was an invalid transaction; ignore it and move on
-        
-    ## Make a block
-    myBlock = makeBlock(txnList,chain)
-    chain.append(myBlock)  
-
-chain[0]
-chain[1]
-state
 
 ###############################################################################
 
@@ -269,13 +235,6 @@ def checkChain(chain):
         parent = block
         
     return state
-
-###############################################################################
-
-checkChain(chain)
-
-chainAsText = json.dumps(chain, sort_keys=True)
-checkChain(chainAsText)
 
 ###############################################################################
 
@@ -377,9 +336,3 @@ def checkChain(chain):
     return state
 
 ###############################################################################
-
-
-checkChain(chain)
-
-chainAsText = json.dumps(chain, sort_keys=True)
-checkChain(chainAsText)
