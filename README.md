@@ -27,9 +27,14 @@ At its core, **a blockchain is a distributed database with a set of rules for ve
 
 We’ll need to create a **transaction pool** of incoming transactions, **validate** those transactions, and make them into a **block**.
 
-We’ll be using a **hash function** to create a ‘*fingerprint*’ for each of our transactions - this hash function links each of our blocks to each other. To make this easier to use, we’ll define a **helper function** to wrap the python hash function that we’re using.
+We’ll be using a **hash function** to create a ‘*fingerprint*’ for each of our transactions - this hash function links each of our blocks to each other. To make this easier to use, we’ll define the *hashMe(msg="")* **helper function** to wrap the python hash function that we’re using.
 
-Next, we want to create a function to generate exchanges between Alice and Bob. We’ll indicate *withdrawals* with negative numbers, and *deposits* with positive numbers. We’ll construct our transactions to always be between the two users of our system, and make sure that the deposit is the same magnitude as the withdrawal - i.e. that we’re neither creating nor destroying money.
+Next, we want to create a function - *makeTransaction()* - to generate exchanges between Alice and Bob. We’ll indicate *withdrawals* with negative numbers, and *deposits* with positive numbers. We’ll construct our transactions to always be between the two users of our system, and make sure that the deposit is the same magnitude as the withdrawal - i.e. that we’re neither creating nor destroying money.
+
+```python
+import random
+random.seed(0)
+```
 
 Now let’s create a large set of transactions, then chunk them into blocks:
 
@@ -45,6 +50,7 @@ No worries though - we don't have to build a system that complicated. We'll defi
 - The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
 - A user's account must have sufficient funds to cover any withdrawals.
 
+These rules lead to the *updateState(txn, state)* and *isValidTxn(txn, state)* functions.
 If either of these conditions are violated, we'll reject the transaction.
 
 Here are a set of **sample transactions**, some of which are fraudulent - but we can now check their validity!
@@ -64,7 +70,7 @@ Each block contains a batch of transactions, a reference to the hash of the prev
 
 ## Building the Blockchain: from Transactions to Blocks
 
-We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by definyng the '*genesis block*' (the first block in the system).
+We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by defining the '*genesis block*' (the first block in the system).
 Because the genesis block isn’t linked to any prior block, it gets treated a bit differently, and we can arbitrarily set the system state. In our case, we’ll **create accounts** for our two users (Alice and Bob) and give them 50 coins each.
 
 ```python
@@ -84,11 +90,45 @@ chain = [genesisBlock]
 
 This becomes the first element from which everything else will be linked.
 For each block, we want to collect a set of transactions, create a header, hash it, and add it to the chain.
+This is all done by the *makeBlock(txns,chain)* function.
 
-Let's use this to process our transaction buffer into a set of blocks.
+Let's use this to process our transaction buffer into a set of blocks:
+
+```python
+# Arbitrary number of transactions per block - this is chosen by the block miner, and can vary between blocks.
+blockSizeLimit = 5
+
+while len(txnBuffer) > 0:
+    bufferStartSize = len(txnBuffer)
+    
+    # Gather a set of valid transactions for inclusion
+    txnList = []
+    while (len(txnBuffer) > 0) & (len(txnList) < blockSizeLimit):
+        newTxn = txnBuffer.pop()
+        validTxn = isValidTxn(newTxn,state) # This will return False if txn is invalid
+        
+        if validTxn:           # If we got a valid state, not 'False'
+            txnList.append(newTxn)
+            state = updateState(newTxn,state)
+        else:
+            print("ignored transaction")
+            sys.stdout.flush()
+            continue  # This was an invalid transaction: ignore it and move on.
+        
+    # Make a block
+    myBlock = makeBlock(txnList,chain)
+    chain.append(myBlock)  
+    
+    chain[0]
+    chain[1]
+```
 
 As expected, the genesis block includes an invalid transaction which initiates account balances (creating tokens out of thin air).
 The hash of the parent block is referenced in the child block, which contains a set of new transactions which affect system state. We can now see the state of the system, updated to include the transactions.
+
+```python
+state
+```
 
 ## Checking Chain Validity
 
