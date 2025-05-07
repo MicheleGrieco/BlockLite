@@ -8,10 +8,21 @@ Clone the repository and follow the inline comments in the Python scripts to exp
 ```bash
 git clone https://github.com/MicheleGrieco/blocklite.git
 cd blocklite
-python3 blocklite.py
+python3 main.py
 ```
 
-# Introduction
+# Project Structure
+
+```bash
+blocklite/
+├── __init__.py
+├── utils.py            # General utility functions
+├── transactions.py     # Transaction-related logic
+├── blockchain.py       # Block and chain operations
+└── main.py             # Entry point or test script
+```
+
+## Introduction
 
 Ever wondered how Bitcoin, Ethereum, and other cryptocurrencies actually work under the hood? This project is a hands-on, code-first exploration into the fundamental mechanics of blockchain technology.
 
