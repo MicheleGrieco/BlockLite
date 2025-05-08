@@ -22,25 +22,23 @@ blocklite/
 └── main.py             # Entry point or test script
 ```
 
-## Introduction
+## The Basics
 
 Ever wondered how Bitcoin, Ethereum, and other cryptocurrencies actually work under the hood? This project is a hands-on, code-first exploration into the fundamental mechanics of blockchain technology.
 
 We'll demystify blockchains by constructing a simple yet functional model, focusing on how and why it works—one block at a time.
 
-## Build your Own Blockchain: The Basics
-
 This tutorial will walk you through the basics of **how to build a blockchain from scratch**. Focusing on the details of a concrete example will provide a deeper understanding of the strengths and limitations of blockchains.
 
 ## Transactions, Validation and updating system state
 
-At its core, **a blockchain is a distributed database with a set of rules for verifying new additions to the database**. We'll start off by tracking the accounts of two imaginary people: *Alice* and *Bob*, who will trade virtual money with each other.
+At a fundamental level, **a blockchain is a shared database governed by rules that determine how new data can be added**. To illustrate this, we'll simulate accounts for two fictional users, *Alice* and *Bob*, who will exchange virtual currency.
 
-We’ll need to create a **transaction pool** of incoming transactions, **validate** those transactions, and make them into a **block**.
+We'll begin by building a **transaction pool** to store pending exchanges, then **verify** each transaction and group valid ones into **blocks**.
 
-We’ll be using a **hash function** to create a ‘*fingerprint*’ for each of our transactions - this hash function links each of our blocks to each other. To make this easier to use, we’ll define the *hashMe(msg="")* **helper function** to wrap the python hash function that we’re using.
+To ensure each transaction is uniquely identified and to link blocks together, we’ll use a **hash function** that acts like a digital fingerprint. To simplify this, we’ll define a helper called *hashMe(msg="")* that wraps Python’s built-in hashing.
 
-Next, we want to create a function - *makeTransaction()* - to generate exchanges between Alice and Bob. We’ll indicate *withdrawals* with negative numbers, and *deposits* with positive numbers. We’ll construct our transactions to always be between the two users of our system, and make sure that the deposit is the same magnitude as the withdrawal - i.e. that we’re neither creating nor destroying money.
+We’ll also write a *makeTransaction()* function to simulate transfers between Alice and Bob. **Withdrawals** will be represented by negative values and **deposits** by positive ones. Every transaction will involve only these two users and ensure that no money is artificially created or destroyed—each deposit will exactly match a withdrawal.
 
 ```python
 import random
@@ -53,18 +51,18 @@ Now let’s create a large set of transactions, then chunk them into blocks:
 txnBuffer = [makeTransaction() for i in range(30)]
 ```
 
-Next step: making our very own blocks! We’ll take the first *k* transactions from the transaction buffer, and turn them into a block. Before we do that, we need to define a method for checking the **validity of the transactions** we’ve pulled into the block.
+Now it’s time to start creating our own blocks! We'll take the first *k* transactions from the transaction pool and bundle them into a new block. But before doing that, we need a way to **verify that the transactions are valid**.
 
-For *bitcoin*, the validation function checks that the input values are valid unspent transaction outputs (UTXOs), that the outputs of the transaction are no greater than the input, and that the keys used for the signatures are valid. In *Ethereum*, the validation function checks that the smart contracts were faithfully executed and respect gas limits.
+In cryptocurrencies like *Bitcoin*, validation involves checking that inputs are unspent outputs from previous transactions, that total outputs don’t exceed inputs, and that digital signatures are correct. *Ethereum* does this by ensuring smart contracts run correctly and stay within gas limits.
 
-No worries though - we don't have to build a system that complicated. We'll define our own, very simple set of rules which make sense for a basic token system.
-- The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
-- A user's account must have sufficient funds to cover any withdrawals.
+Thankfully, our system is much simpler. We’ll use two basic rules that are suitable for a simple token-based model:
 
-These rules lead to the *updateState(txn, state)* and *isValidTxn(txn, state)* functions.
-If either of these conditions are violated, we'll reject the transaction.
+* The total of all deposits and withdrawals must be zero (so tokens aren’t created or destroyed).
+* A user must have enough balance to make a withdrawal.
 
-Here are a set of **sample transactions**, some of which are fraudulent - but we can now check their validity!
+These checks are handled by the *updateState(txn, state)* and *isValidTxn(txn, state)* functions. Any transaction that breaks these rules will be rejected.
+
+We’ll then test these rules using **example transactions**, including some intentionally invalid ones, to demonstrate how validation works.
 
 ```python
 # Initial state
@@ -77,12 +75,11 @@ print(isValidTxn({u'Alice': -4, u'Bob': 2,'Lisa':2}, state)) # Creating new user
 print(isValidTxn({u'Alice': -4, u'Bob': 3,'Lisa':2}, state)) # Not valid
 ```
 
-Each block contains a batch of transactions, a reference to the hash of the previous block (if block number is greater than 1), and a hash of its contents and the header.
+Each block holds a group of transactions, a link to the hash of the preceding block (for all blocks after the first), and its own hash, which is generated from its contents and header.
 
 ## Building the Blockchain: from Transactions to Blocks
 
-We're ready to start making our blockchain! Right now, there's nothing on the blockchain, but we can get things started by defining the '*genesis block*' (the first block in the system).
-Because the genesis block isn’t linked to any prior block, it gets treated a bit differently, and we can arbitrarily set the system state. In our case, we’ll **create accounts** for our two users (Alice and Bob) and give them 50 coins each.
+Now we’re ready to build our blockchain! Since it’s currently empty, we’ll begin by creating the **genesis block**, which is the very first block in the chain. Unlike other blocks, it doesn’t reference a previous one, so we can define its state manually. For our setup, we’ll initialize accounts for Alice and Bob, assigning 50 coins to each.
 
 ```python
 # Genesis block
@@ -99,11 +96,9 @@ genesisBlockStr = json.dumps(genesisBlock, sort_keys=True)
 chain = [genesisBlock]
 ```
 
-This becomes the first element from which everything else will be linked.
-For each block, we want to collect a set of transactions, create a header, hash it, and add it to the chain.
-This is all done by the *makeBlock(txns,chain)* function.
+This genesis block serves as the foundation for the entire blockchain—every subsequent block will be linked to it. For each new block, we’ll gather valid transactions, generate a header, compute its hash, and append it to the chain. The *makeBlock(txns, chain)* function handles this process.
 
-Let's use this to process our transaction buffer into a set of blocks:
+Now, let’s use it to turn our transaction pool into a series of blocks:
 
 ```python
 # Arbitrary number of transactions per block - this is chosen by the block miner, and can vary between blocks.
@@ -134,8 +129,7 @@ while len(txnBuffer) > 0:
     chain[1]
 ```
 
-As expected, the genesis block includes an invalid transaction which initiates account balances (creating tokens out of thin air).
-The hash of the parent block is referenced in the child block, which contains a set of new transactions which affect system state. We can now see the state of the system, updated to include the transactions.
+As anticipated, the genesis block contains a special transaction that sets initial account balances—effectively creating tokens from nothing. Each subsequent block references the hash of its parent and includes new transactions that modify the system’s state. We can now observe how these transactions have updated the overall state.
 
 ```python
 state
