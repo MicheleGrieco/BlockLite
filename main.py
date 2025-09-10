@@ -4,8 +4,8 @@ RULES for a simple banking system:
 - A user’s account must have sufficient funds to cover any withdrawals
 """
 
-from transactions import make_transaction
-from blockchain import make_block, check_chain
+from transactions import TransactionManager
+from blockchain import Blockchain
 from utils import hashMe
 
 # Initialize

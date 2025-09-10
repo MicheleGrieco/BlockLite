@@ -9,11 +9,11 @@ class TransactionManager:
         Args:
             initial_state (dict, optional): Initial state of the transactions. Default: None
         """
-        # Set the random seed for reproducibility
-        random.seed(0)
+
+        random.seed(0) # Set a fixed seed for reproducibility
         self.state = initial_state if initial_state is not None else {}
 
-    def make_transaction(self, max_value=3):
+    def make_transaction(self, max_value=3) -> dict:
         """
         Creates a random transaction between Alice and Bob, where the amount is between -max_value and max_value.
         The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
@@ -31,6 +31,7 @@ class TransactionManager:
         # Randomly choose a value between -1 and 1
         sign = int(random.getrandbits(1)) * 2 - 1
         amount = random.randint(1, max_value)
+        
         # By construction, this will always return transactions that respect the conservation of tokens.
         alice_pays = sign * amount
         bob_pays = -1 * alice_pays
@@ -38,7 +39,7 @@ class TransactionManager:
         return {u'Alice':alice_pays, u'Bob':bob_pays}
 
 
-    def update_state(self, transaction, state):
+    def update_state(self, transaction, state) -> dict:
         """
         Updates the state of the accounts based on the transaction.
         
@@ -52,6 +53,7 @@ class TransactionManager:
         if not self.is_valid_transaction(transaction):
             raise ValueError("Invalid transaction.")
         
+        # Update the state with the transaction
         for account, amount in transaction.items():
             if account in self.state:
                 self.state[account] += amount
@@ -87,7 +89,7 @@ class TransactionManager:
         
         return True
     
-    def get_state(self):
+    def get_state(self) -> dict:
         """
         Return a copy of the current state
         Returns:

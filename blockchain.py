@@ -1,6 +1,6 @@
 import json
-from utils import hashMe
-from transactions import is_valid_transaction, update_state
+from utils import hash_me
+from transactions import TransactionManager
 
 class Blockchain:
     
@@ -38,7 +38,7 @@ class Blockchain:
             'transactionsCount': len(transactions),
             'transactions': transactions
         }
-        block_hash = hashMe(block_contents)
+        block_hash = hash_me(block_contents)
         return {'hash': block_hash, 'contents': block_contents}
 
 
@@ -51,7 +51,7 @@ class Blockchain:
         """
 
         # Raise an exception if the hash does not match the block contents
-        expected_hash = hashMe(block['contents'])
+        expected_hash = hash_me(block['contents'])
         if block['hash'] != expected_hash:
             raise Exception(f"Hash does not match contents of block {block['contents']['blockNumber']}")
 
@@ -78,8 +78,8 @@ class Blockchain:
         
         # Check transaction validity; throw an error if an invalid transaction is found
         for transaction in block['contents']['txns']:
-            if is_valid_transaction(transaction, state):
-                state = update_state(transaction, state)
+            if TransactionManager().is_valid_transaction(transaction):
+                state = transaction.update_state(transaction, state)
             else:
                 raise Exception(f"Invalid transaction in block {block_number}: {transaction}")
         
@@ -94,7 +94,7 @@ class Blockchain:
         return state
 
 
-    def check_chain(self) -> dict:
+    def check_chain(self) -> dict | bool:
         """
         Check if a chain of blocks is valid according to the rules defined.
         Work through the chain from the genesis block (which gets special treatment),
