@@ -13,7 +13,7 @@ class TransactionManager:
         random.seed(0)
         self.state = initial_state if initial_state is not None else {}
 
-    def makeTransaction(self, max_value=3):
+    def make_transaction(self, max_value=3):
         """
         Creates a random transaction between Alice and Bob, where the amount is between -max_value and max_value.
         The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
