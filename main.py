@@ -4,8 +4,8 @@ RULES for a simple banking system:
 - A user’s account must have sufficient funds to cover any withdrawals
 """
 
-from transactions import makeTransaction
-from blockchain import makeBlock, checkChain
+from transactions import make_transaction
+from blockchain import make_block, check_chain
 from utils import hashMe
 
 # Initialize
@@ -23,10 +23,10 @@ chain = [genesisBlock]
 
 # Add blocks
 for i in range(5):
-    txnBuffer = [makeTransaction() for _ in range(5)]
-    newBlock = makeBlock(txnBuffer, chain)
+    txnBuffer = [make_transaction() for _ in range(5)]
+    newBlock = make_block(txnBuffer, chain)
     chain.append(newBlock)
 
 # Check chain validity
-final_state = checkChain(chain)
+final_state = check_chain(chain)
 print("Final state:", final_state)
