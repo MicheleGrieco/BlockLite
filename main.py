@@ -1,32 +1,40 @@
 """
-RULES for a simple banking system:
-- The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed)
-- A user’s account must have sufficient funds to cover any withdrawals
+BlockLite - A minimal blockchain implementation in Python.
+
+This script demonstrates the core blockchain functionality:
+1. Creating a genesis block with initial balances
+2. Generating and validating transactions
+3. Mining new blocks
+4. Verifying chain integrity
 """
 
-from transactions import TransactionManager
 from blockchain import Blockchain
-from utils import hashMe
+from transactions import TransactionManager
 
-# Initialize
-genesisBlock = {
-    'hash': '',
-    'contents': {
-        'blockNumber': 0,
-        'parentHash': None,
-        'txnCount': 1,
-        'txns': [{'Alice': 50, 'Bob': -50}]
-    }
-}
-genesisBlock['hash'] = hashMe(genesisBlock['contents'])
-chain = [genesisBlock]
 
-# Add blocks
 for i in range(5):
-    txnBuffer = [make_transaction() for _ in range(5)]
-    newBlock = make_block(txnBuffer, chain)
-    chain.append(newBlock)
-
-# Check chain validity
-final_state = check_chain(chain)
-print("Final state:", final_state)
+    transactions = [
+        
+    ]
+    
+def main():
+    blockchain = Blockchain()
+    tx_manager = TransactionManager(seed=42) # Fixed seed for reproducibility
+    initial_balances = {"Alice": 50, "Bob": 50}
+    genesis = blockchain.create_genesis_block(initial_balances)
+    
+    for i in range(5):
+        transactions = [
+            tx_manager.create_random_transaction(("Alice", "Bob"), max_amount=5)
+            for _ in range(3)
+        ]
+        
+        print(f"\n Mining block {i + 1}")
+        print(f"Candidate transactions: {transactions}")
+        try:
+            block = blockchain.mine_block(transactions)
+            print(f"Block mined: {block}")
+            print(f"   State: Alice={blockchain.get_balance('Alice')}, Bob={blockchain.get_balance('Bob')}")
+        except Exception as e:
+            print(f"Failed to mine block: {e}")
+            

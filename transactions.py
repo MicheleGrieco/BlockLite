@@ -1,98 +1,130 @@
 import random
+from typing import Optional
+from exceptions import InsufficientFundsError, UnbalancedTransactionError
 
 class TransactionManager:
 
-    def __init__(self, initial_state=None) -> None:
+    def __init__(self, seed: Optional[int] = None) -> None:
         """
-        Initialize transactions manager.
+        Initialize the transactions manager.
         
         Args:
-            initial_state (dict, optional): Initial state of the transactions. Default: None
+            seed: Optional random seed for reproducible transaction generation.
         """
 
-        random.seed(0) # Set a fixed seed for reproducibility
-        self.state = initial_state if initial_state is not None else {}
-
-    def make_transaction(self, max_value=3) -> dict:
+        if seed is not None:
+            random.seed(seed) # Set a fixed seed for reproducibility
+        
+    def create_transaction(self, sender: str, receiver: str, amount: int) -> dict:
         """
-        Creates a random transaction between Alice and Bob, where the amount is between -max_value and max_value.
-        The sum of deposits and withdrawals must be 0 (tokens are neither created nor destroyed).
-        A user’s account must have sufficient funds to cover any withdrawals.
-        The transaction is represented as a dictionary with account names as keys and amounts as values.
-        The function returns a dictionary with the transaction details.
-        The transaction is guaranteed to be valid according to the rules defined in the is_valid_transaction function.
-
+        Create a transaction transferring tokens between accounts.
+        
         Args:
-            max_value (int, optional): Defaults to 3.
-
+            sender: The account sending tokens (will be debited).
+            receiver: The account receiving tokens (will be credited).
+            amount: The positive amount to transfer.
+        
         Returns:
-            str: A string representation of the transaction.
+            A transaction dictionary with account changes.
+        
+        Raises:
+            ValueError: If amount is not positive.
         """
-        # Randomly choose a value between -1 and 1
-        sign = int(random.getrandbits(1)) * 2 - 1
-        amount = random.randint(1, max_value)
         
-        # By construction, this will always return transactions that respect the conservation of tokens.
-        alice_pays = sign * amount
-        bob_pays = -1 * alice_pays
+        if amount <= 0:
+            raise ValueError("Transaction amount must be positive.")
         
-        return {u'Alice':alice_pays, u'Bob':bob_pays}
-
-
-    def update_state(self, transaction, state) -> dict:
-        """
-        Updates the state of the accounts based on the transaction.
-        
-        Args:
-            transaction (dict): dictionary keyed with account names, holding numeric values for transfer amount
-            state (dict): dictionary keyed with account names, holding numeric values for account balance
-
-        Returns:
-            dict: Updated state, with additional users added to state if necessary
-        """
-        if not self.is_valid_transaction(transaction):
-            raise ValueError("Invalid transaction.")
-        
-        # Update the state with the transaction
-        for account, amount in transaction.items():
-            if account in self.state:
-                self.state[account] += amount
-            else:
-                self.state[account] = amount
-                
-        # As dictionaries are mutable, let's avoid any confusion by creating a working copy of the data.
-        return self.state.copy()
-
-
-    def is_valid_transaction(self, transaction) -> bool:
-        
-        """
-        Checks if a transaction is valid according to the rules defined.
-        
-        Args:
-            txn (dict): dictionary keyed with account names, holding numeric values for transfer amount
-            state (dict): dictionary keyed with account names, holding numeric values for account balance
-
-        Returns:
-            bool: True if the transaction is valid, False otherwise
-        """
-
-        # Check that the sum of the deposits and withdrawals is 0
-        if sum(transaction.values()) != 0:
-            return False
-        
-        # Check that the transaction does not cause an overdraft
-        for account, amount in transaction.items():
-            current_balance = self.state.get(account, 0)
-            if (current_balance + amount) < 0:
-                return False
-        
-        return True
+        return {sender: -amount, receiver: amount}
     
-    def get_state(self) -> dict:
+    def create_random_transaction(
+        self, 
+        accounts: tuple[str, str] = ("Alice", "Bob"),
+        max_amount: int = 3
+    ) -> dict[str, int]:
         """
-        Return a copy of the current state
+        Create a random transaction between two accounts.
+        
+        Args:
+            accounts: Tuple of two account names.
+            max_amount: Maximum transfer amount.
+        
         Returns:
-            dict: Current transactions state
+            A random valid transaction dictionary.
         """
-        return self.state.copy()
+        amount = random.randint(1, max_amount)
+        # Randomly choose direction
+        if random.random() < 0.5:
+            return {accounts[0]: -amount, accounts[1]: amount}
+        else:
+            return {accounts[0]: amount, accounts[1]: -amount}
+    
+    def validate_transaction(
+        self, 
+        transaction: dict[str, int], 
+        state: dict[str, int]
+    ) -> None:
+        """
+        Validate a transaction against the current state.
+        
+        Args:
+            transaction: The transaction to validate.
+            state: Current account balances.
+        
+        Raises:
+            UnbalancedTransactionError: If transfers don't sum to zero.
+            InsufficientFundsError: If any account would go negative.
+        """
+        # Rule 1: Conservation of tokens
+        if sum(transaction.values()) != 0:
+            raise UnbalancedTransactionError(
+                f"Transaction must sum to zero, got {sum(transaction.values())}"
+            )
+        
+        # Rule 2: No overdrafts
+        for account, change in transaction.items():
+            current_balance = state.get(account, 0)
+            new_balance = current_balance + change
+            if new_balance < 0:
+                raise InsufficientFundsError(
+                    f"Account '{account}' would have negative balance: {new_balance}"
+                )
+    
+    def is_valid(self, transaction: dict[str, int], state: dict[str, int]) -> bool:
+        """
+        Check if a transaction is valid without raising exceptions.
+        
+        Args:
+            transaction: The transaction to check.
+            state: Current account balances.
+        
+        Returns:
+            True if valid, False otherwise.
+        """
+        try:
+            self.validate_transaction(transaction, state)
+            return True
+        except (UnbalancedTransactionError, InsufficientFundsError):
+            return False
+    
+    @staticmethod
+    def apply_transaction(
+        transaction: dict[str, int], 
+        state: dict[str, int]
+    ) -> dict[str, int]:
+        """
+        Apply a transaction to a state, returning the new state.
+        
+        Note: This does NOT validate the transaction. Call validate_transaction
+        first if validation is needed.
+        
+        Args:
+            transaction: The transaction to apply.
+            state: Current account balances.
+        
+        Returns:
+            New state dictionary with updated balances.
+        """
+        new_state = state.copy()
+        for account, change in transaction.items():
+            new_state[account] = new_state.get(account, 0) + change
+        return new_state

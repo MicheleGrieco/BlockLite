@@ -1,24 +1,24 @@
+"""
+Utility functions for the blockchain.
+"""
+
 import hashlib
 import json
-import sys
 
 
-def hash_me(msg=""):
+def hash_data(data: str | dict) -> str:
     """
-    Helper function to hash a message using SHA-256 algorithm.
-    The message can be a string or a dictionary.
-    If it's a dictionary, it will be converted to a JSON string with sorted keys to ensure consistent hashing.
-
+    Generate a SHA-256 hash of the input data.
     Args:
-        msg (str, optional): Defaults to "".
+        data: A string or dictionary to hash. Dictionaries are serialized
+                to JSON with sorted keys for consistent hashing.
 
     Returns:
-        str: The SHA-256 hash of the message.
+        The hexadecimal SHA-256 hash string.
     """
-    if not isinstance(msg, str):
+    if isinstance(data, dict):
         # Sorting keys to guarantee consistent hashing for dicts
-        msg = json.dumps(msg, sort_keys=True)
+        data = json.dumps(data, sort_keys=True)
     
     # Always encode the message to bytes
-    msg_bytes = msg.encode('utf-8')
-    return hashlib.sha256(msg_bytes).hexdigest()
+    return hashlib.sha256(data.encode('utf-8')).hexdigest()
