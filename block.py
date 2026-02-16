@@ -3,7 +3,7 @@ Block creation and validation for the blockchain.
 """
 import time
 from utils import hash_data
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 from exceptions import InvalidBlockError
 
@@ -20,17 +20,14 @@ class Block:
         hash: SHA-256 hash of the block contents.
     """
     
-    def __init__(
-        self,
-        block_number: int,
-        transactions: list[dict[str, int]],
-        parent_hash: Optional[str] = None,
-        timestamp: Optional[float] = None
-        ) -> None:
-        self.block_number = block_number
-        self.transactions = transactions
-        self.parent_hash = parent_hash
-        self.timestamp = timestamp or time.time()
+    block_number: int
+    transactions: list[dict[str, int]]
+    parent_hash: Optional[str] = None
+    timestamp: float = field(default_factory=time.time)
+    hash: str = field(init=False)
+    
+    def __post_init__(self) -> None:
+        """Calculate hash after initialization."""
         self.hash = self._calculate_hash()
         
     @property
@@ -49,7 +46,7 @@ class Block:
         return hash_data(self.contents)
     
     def to_dict(self) -> dict:
-        """"Convert block to dictionary representation."""
+        """Convert block to dictionary representation."""
         return {
             "hash": self.hash,
             "contents": self.contents 
@@ -83,7 +80,7 @@ class Block:
         return block
     
     def verify_hash(self) -> bool:
-        """"Verify that the block's hash matches its contents."""
+        """Verify that the block's hash matches its contents."""
         return self.hash == self._calculate_hash()
     
     def __repr__(self) -> str:
