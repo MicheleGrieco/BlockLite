@@ -6,11 +6,13 @@ Blockchain management - the core chain data structure and operations.
 
 import json
 from typing import Optional
+from dataclasses import dataclass, field
 
 from block import Block
 from transactions import TransactionManager
 from exceptions import InvalidBlockError, InvalidTransactionError
 
+@dataclass
 class Blockchain:
     """
     A simple blockchain implementation.
@@ -27,12 +29,10 @@ class Blockchain:
         4. Block hashes must match their contents
     """
     
-    def __init__(self) -> None:
-        """Initialize an empty blockchain."""
-        self.chain: list[Block] = []
-        self.state: dict[str, int] = {}
-        self.tx_manager = TransactionManager()
-
+    chain: list[Block] = field(default_factory=list)
+    state: dict[str, int] = field(default_factory=dict)
+    tx_manager: TransactionManager = field(default_factory=TransactionManager)
+    
     @property
     def height(self) -> int:
         """Return the number of blocks in the chain."""
@@ -41,6 +41,7 @@ class Blockchain:
     @property
     def latest_block(self) -> Optional[Block]:
         """Return the most recent block, or None if chain is empty."""
+        return self.chain[-1] if self.chain else None
         
     def create_genesis_block(self, initial_balances: dict[str, int]) -> Block:
         """
@@ -235,7 +236,7 @@ class Blockchain:
             self.chain = temp_chain
             raise
         
-     def get_balance(self, account: str) -> int:
+    def get_balance(self, account: str) -> int:
         """Get the current balance of an account."""
         return self.state.get(account, 0)
     
