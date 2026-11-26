@@ -1,83 +1,76 @@
 # BlockLite
 
-A minimal yet powerful blockchain algorithm built from scratch in Python.
+A minimal, account-based blockchain built from scratch in Python, with no runtime dependencies.
 > Credits: <a href="https://ecomunsing.com/build-your-own-blockchain">Build your own blockchain</a> by Ellery Comunsing.
-
-# Getting Started
-
-BlockLite is currently under active development. The following features have already been implemented:
-
-- Basic blockchain structure with blocks linked by hash
-- Mining function with proof-of-work
-- Chain validation
-- Adding new transactions and blocks
-- Blockchain serialization and deserialization
-
-## Next Steps
-
-- Implementation of a simple REST API
-- Minimal user interface
-- Improved transaction management
-
-## How to contribute
-
-Feel free to open issues or pull requests to suggest improvements or report bugs.
-
-# Technical Overview
-
-## Architecture
-
-BlockLite is composed of the following core components:
-
-- **Block**: Represents a single block in the chain, containing transactions, a timestamp, a nonce, and the hash of the previous block.
-- **Blockchain**: Manages the chain of blocks, validation logic, and consensus (proof-of-work).
-- **Transaction**: (Planned) Encapsulates transaction data to be included in blocks.
-- **Persistence**: Serialization and deserialization of the blockchain to/from disk.
 
 ## Features
 
-- SHA-256 hashing for block integrity
-- Adjustable proof-of-work difficulty
-- Chain validation to ensure immutability
-- Simple transaction pool (planned)
-- Extensible for networking and APIs
+- Blocks linked by SHA-256 hash, immutable once created
+- Proof-of-work mining with adjustable difficulty (leading hex zeros)
+- Account-based transactions with three rules: well-formed, zero-sum, no overdrafts
+- Genesis block as the only source of new tokens (non-negative allocations only)
+- Pending transaction pool (mempool) validated against the projected state
+- Full chain re-validation from genesis, including detection of a tampered state
+- Timestamp checks (monotonic, bounded future drift)
+- JSON serialization and atomic save/load to disk, with re-validation on load
+- Typed exception hierarchy for precise error handling
+
+## Getting started
+
+Requires **Python 3.10+**.
+
+```bash
+git clone https://github.com/MicheleGrieco/BlockLite.git
+cd BlockLite
+python main.py          # runs the demo and writes chain.json
+pip install -r requirements.txt
+pytest                  # runs the test suite
+```
 
 ## Usage
 
-1. **Clone the repository**  
-   `git clone https://github.com/yourusername/BlockLite.git`
+```python
+from blockchain import Blockchain
 
-2. **Install dependencies**  
-   BlockLite uses only Python standard libraries (Python 3.7+ required).
+bc = Blockchain(difficulty=3)
+bc.create_genesis_block({"Alice": 50, "Bob": 50})
 
-3. **Run the blockchain**  
-   ```bash
-   python main.py
-   ```
+bc.submit_transaction({"Alice": -10, "Bob": 10})   # queued in the mempool
+bc.submit_transaction({"Bob": -5, "Carol": 5})     # multi-account transfers are allowed
+block = bc.mine_pending()                          # proof-of-work + validation
 
-4. **Mine a new block**  
-   Use the CLI or API (when available) to add transactions and mine blocks.
+print(bc.get_balance("Alice"))   # 40
+bc.validate_chain()              # replays the chain from genesis
 
-## Project Status
+bc.save("chain.json")
+restored = Blockchain.load("chain.json")
+```
 
-BlockLite is under active development. Implemented features:
+## Architecture
 
-- Core blockchain and block logic
-- Proof-of-work mining
-- Chain validation
-- Block and chain serialization
+| Module | Responsibility |
+| --- | --- |
+| `utils.py` | Canonical JSON, SHA-256 hashing, difficulty check |
+| `exceptions.py` | `BlockchainError` hierarchy (transaction, block, PoW, load errors) |
+| `transactions.py` | `TransactionManager`: creation, structural and state validation, application |
+| `block.py` | Immutable `Block` dataclass, mining, (de)serialization |
+| `blockchain.py` | `Blockchain`: chain rules, mempool, validation, persistence |
+| `main.py` | Demo script |
+| `tests.py` | pytest suite |
 
-Planned features:
+A transaction is a mapping `{account: delta}`; for example `{"Alice": -5, "Bob": 5}` moves 5 tokens from Alice to Bob.
 
-- REST API for interaction
-- Minimal web-based UI
-- Enhanced transaction management
-- Peer-to-peer networking
+## Roadmap
+
+- Digital signatures (Ed25519) and account nonces, so only the owner can spend
+- Merkle root in the block header
+- Difficulty retargeting based on block time
+- Command-line interface and REST API
+- Peer-to-peer networking with longest/heaviest-chain fork choice
 
 ## Contributing
 
 - Fork the repository and create a feature branch
 - Write clear, concise commit messages
-- Ensure code is PEP8 compliant and tested
+- Keep code PEP 8 compliant and covered by tests (`pytest`)
 - Open a pull request describing your changes
----
